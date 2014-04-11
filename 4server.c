@@ -16,7 +16,7 @@
 #include <fcntl.h>
 
 #define TIMEOUT_SEC 10     // Timeout (seconds) if access limitation needed
-#define DEFAULT_PORT 8888  // Default port number for use of this web-server
+#define DEFAULT_PORT 3030  // Default port number for use of this web-server
 #define MAX_CONNECTIONS 10 // Max # of clients that can request at a time
 #define MAXBUFLEN 512      // The maximum buffer length
 
@@ -172,6 +172,10 @@ void honor_request(int conn_sockfd) {
 	}
       }
       if (simple == 1 || bad_request == 0) {
+	if (strcmp(token_holder0, "/") == 0) {
+	  printf("File path not specified; redirecting to: /index.html\n");
+	  strcpy(token_holder0, "/index.html");
+	}
 	strcpy(&path[strlen(path)], token_holder0);
 	printf("Path of target file: %s\n", path);
 	type_token = strtok(token_holder0, ".");
@@ -195,10 +199,30 @@ void honor_request(int conn_sockfd) {
 	  write(conn_sockfd, "HTTP/1.0 404 Not Found\n", 23);
 	}
       }
-    } else if (strncmp(token_holder0, "PUSH\0", 5) == 0) {
-      printf("The request contained command: PUSH\n");
+    } else if (strncmp(token_holder0, "POST\0", 5) == 0) {
+      printf("The request contained command: POST\n");
+      /*
+      do {
+	
+      strcpy(sendbuf, "POST ");
+      strncat(sendbuf, );
+      strcat(sendbuf, "HTTP/1.0\n");
+      write(conn_sockfd, sendbuf, strlen(sendbuf));
+      strcpy(sendbuf, "Host: ");
+      strncat(sendbuf, );
+      strcat(sendbuf, "\n");
+      write(conn_sockfd, sendbuf, strlen(sendbuf));
+      write(conn_sockfd, "Content-type: application/x-www-form-urlencoded\n", 48);
+      strcpy(sendbuf, "Content-length: ");
+      strncat(sendbuf, );
+      strcat(sendbuf, "\n\n");
+      write(conn_sockfd, sendbuf, strlen(sendbuf));
+      strcpy(sendbuf, );
+      write(conn_sockfd, sendbuf, strlen(sendbuf));
+      */
     } else {
-      printf("Unsupported command; request will not be processed\n");
+      printf("Not an implemented command; request will not be processed\n");
+      write(conn_sockfd, "HTTP/1.0 501 Not Implemented\n", 29);
     }
   }
   printf("Successfully honored the client's request!\n\n");
